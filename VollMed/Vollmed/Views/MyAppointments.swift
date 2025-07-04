@@ -8,15 +8,42 @@
 import SwiftUI
 
 struct MyAppointments: View {
-    var body: some View {
-        VStack {
-            Text ("Minhas consultas")
+    
+    let service = WebService()
+    
+    @State private var appointments: [Appointment] = []
+    
+    func getAllAppointments() async {
+        do {
+            if let appointments = try await service.getAllAppointmentsFromPatient(patientID: patientID) {
+                self.appointments = appointments
+            }
+        } catch {
+            print("Ocorreu um erro ao obter consultas: \(error)")
         }
-        .navigationTitle("Minhas consultas")
-        .navigationBarTitleDisplayMode(.large)
+    }
+    
+    var body: some View {
+        
+        NavigationStack {
+            ScrollView{
+                ForEach(appointments) { appointment in
+                    SpecialistCardView(specialist: appointment.specialist, appointment: appointment)
+                }
+            }
+            .scrollIndicators(.hidden)
+            .navigationTitle("Minhas consultas")
+            .navigationBarTitleDisplayMode(.large)
+            .padding()
+            .onAppear {
+                Task {
+                    await getAllAppointments()
+                }
+            }
+        }
     }
 }
-
 #Preview {
     MyAppointments()
 }
+
