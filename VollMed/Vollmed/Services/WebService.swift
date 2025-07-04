@@ -7,9 +7,62 @@
 
 import UIKit
 
+let patientID = "a844ea43-f11d-4ee0-b031-5890cbcc17c5"
+
 struct WebService {
     
     private let baseURL = "http://localhost:3000"
+    
+    /*func scheduleAppointment(specialistID: String,
+                             patientID: String,
+                             date: String) async throws -> ScheduleAppointmentResponse? {
+        let endpoint = baseURL + "/consulta"
+        
+        guard let url = URL(string: endpoint) else {
+            print ("Erro na URL!")
+            return nil
+        }
+        
+        let appointment = ScheduleAppointmentRequest(specialist: specialistID, patient: patientID, date: date)
+         
+        let jsonData = try JSONEncoder().encode(appointment)
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("aplication/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        let appointmentResponse = try JSONDecoder().decode(ScheduleAppointmentResponse.self, from: data)
+        return appointmentResponse
+    }*/
+    
+    func scheduleAppointment(specialistID: String,
+                                 patientID: String,
+                                 date: String) async throws -> ScheduleAppointmentResponse? {
+            let endpoint = baseURL + "/consulta"
+            
+            guard let url = URL(string: endpoint) else {
+                print("Erro na URL!")
+                return nil
+            }
+            
+            let appointment = ScheduleAppointmentRequest(specialist: specialistID, patient: patientID, date: date)
+            
+            let jsonData = try JSONEncoder().encode(appointment)
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = jsonData
+            
+            let (data, _) = try await URLSession.shared.data(for: request)
+            let appointmentResponse = try JSONDecoder().decode(ScheduleAppointmentResponse.self, from: data)
+            
+            return appointmentResponse
+            
+        }
     
     func dowloadImage(from imageURL: String) async throws -> UIImage? {
         guard let url = URL(string: imageURL) else {

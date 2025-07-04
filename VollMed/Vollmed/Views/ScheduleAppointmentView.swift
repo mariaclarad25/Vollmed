@@ -9,7 +9,36 @@ import SwiftUI
 
 struct ScheduleAppointmentView: View {
     
+    let service = WebService()
+    var specialistID: String
+    
     @State private var selectedDate = Date()
+    @State private var showAlert = false
+    @State private var isAppointmentSchedule = false
+    
+    /*func scheduleAppointment() async {
+        do {
+            if let _ = try await service.scheduleAppointment(specialistID: specialistID, patientID: patientID, date: selectedDate.convertToString()) {
+                isAppointmentSchedule = true
+            } else {
+                isAppointmentSchedule = false
+            }
+        } catch {
+            isAppointmentSchedule = false
+            print ("Ocorreu em erro ao agendar consulta: \(error)")
+        }
+        showAlert = true
+    }*/
+    func scheduleAppointment() async {
+        do {
+            if let appointment = try await  service.scheduleAppointment(specialistID: specialistID, patientID: patientID, date: selectedDate.convertToString()) {
+                print(appointment)
+            }
+        } catch {
+            print("Ocorreu um erro ao agendar consulta: \(error)")
+        }
+        showAlert = true
+    }
     
     var body: some View {
         VStack {
@@ -25,7 +54,9 @@ struct ScheduleAppointmentView: View {
                 .datePickerStyle(.graphical)
             
             Button(action: {
-                print(selectedDate.convertToString().convertDateStringToReadebleDate())
+                Task {
+                    await scheduleAppointment()
+                }
             }, label: {
                 ButtonView(text: "Agendar Consulta")
             })
@@ -35,9 +66,21 @@ struct ScheduleAppointmentView: View {
         .onAppear{
             UIDatePicker.appearance().minuteInterval = 15
         }
+        .alert(isAppointmentSchedule ? "Sucesso!" : "Ops, algo deu errado!", isPresented: $showAlert, presenting: isAppointmentSchedule) { _ in
+            Button(action: /*@START_MENU_TOKEN@*/{}/*@END_MENU_TOKEN@*/, label: {
+                Text("Ok")
+            })
+        } message: { isScheduled in
+            if isScheduled {
+                Text ("A consulta foi agendada com sucesso!")
+            } else {
+                Text ("Houve um erro ao agendar sua consulta. Por favor tente novamente ou entre em contato via telefone.")
+            }
+        }
+
     }
 }
 
 #Preview {
-    ScheduleAppointmentView()
+    ScheduleAppointmentView(specialistID: "123")
 }
