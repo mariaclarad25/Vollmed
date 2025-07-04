@@ -17,7 +17,7 @@ struct ScheduleAppointmentView: View {
     
     @State private var selectedDate = Date()
     @State private var showAlert = false
-    @State private var isAppointmentSchedule = false
+    @State private var isAppointmentScheduled = false
     
     init(specialistID: String, isRescheduleView: Bool = false, appointmentID: String? = nil) {
         self.specialistID = specialistID
@@ -30,14 +30,24 @@ struct ScheduleAppointmentView: View {
             print("Houve um erro ao obter o ID da consulta")
             return
         }
-        print(appointmentID)
+        do {
+            if let _ = try await service.rescheduleAppointment(appointmentID: appointmentID, date: selectedDate.convertToString()) {
+                isAppointmentScheduled = true
+            } else {
+                isAppointmentScheduled = false
+            }
+        } catch {
+            print("Ocorreu um erro ao remarcar consulta: \(error)")
+            isAppointmentScheduled = false
+        }
+        showAlert = true
     }
     
     func scheduleAppointment() async {
         do {
             if let appointment = try await  service.scheduleAppointment(specialistID: specialistID, patientID: patientID, date: selectedDate.convertToString()) {
                 print(appointment)
-                isAppointmentSchedule = true
+                isAppointmentScheduled = true
             }
         } catch {
             print("Ocorreu um erro ao agendar consulta: \(error)")
@@ -75,7 +85,7 @@ struct ScheduleAppointmentView: View {
         .onAppear{
             UIDatePicker.appearance().minuteInterval = 15
         }
-        .alert(isAppointmentSchedule ? "Sucesso!" : "Ops, algo deu errado!", isPresented: $showAlert, presenting: isAppointmentSchedule) { _ in
+        .alert(isAppointmentScheduled ? "Sucesso!" : "Ops, algo deu errado!", isPresented: $showAlert, presenting: isAppointmentScheduled) { _ in
             Button(action: /*@START_MENU_TOKEN@*/{}/*@END_MENU_TOKEN@*/, label: {
                 Text("Ok")
             })

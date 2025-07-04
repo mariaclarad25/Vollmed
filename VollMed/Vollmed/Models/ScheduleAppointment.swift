@@ -8,7 +8,7 @@
 import Foundation
 
 struct ScheduleAppointmentResponse: Codable, Identifiable{
-    let id: String
+    let id: String?
     let specialist: String
     let patient: String
     let date: String
